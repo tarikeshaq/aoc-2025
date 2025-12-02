@@ -36,11 +36,6 @@ let rotate d instruction =
        position = pos_mod (d.position + num) 100;
        num_zeros_seen = num_zeros_seen;
     }
-    
-    
-
-    
- 
 
 let parse_line line =
     let len = String.length line in
