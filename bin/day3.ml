@@ -1,15 +1,16 @@
 let revoke_xth l x n =
-    let (_, res) = List.fold_left (fun acc e ->
+    List.fold_left (fun acc e ->
         let (i, acc) = acc in
         if i == x then (i+1, acc)
         else 
             (i+1, e :: acc)
-    ) (0, []) l in
-    List.rev (n :: res)
+    ) (0, []) l
+    |> (fun (_, res) -> n :: res)
+    |> List.rev
 
 let joltage bank len =
-    String.fold_right (fun c acc -> 
-        if List.length acc < len then c :: acc  (*TODO: use cons and reverse*)
+    String.fold_left (fun acc c -> 
+        if List.length acc < len then acc @ [c]  (*TODO: use cons and reverse*)
         else
          let (_, idx) = List.fold_left (fun best e -> 
                 let (best, idx_to_replace) = best in
@@ -18,7 +19,7 @@ let joltage bank len =
                 if (curr_score > best) then (curr_score, e) else (best, idx_to_replace) 
             ) (Util.join_list_to_int acc, -1) (Util.range 0 (len-1)) in
         if idx == -1 then acc else (revoke_xth acc idx c)
-    ) bank []
+    ) [] bank 
     |> Util.join_list_to_int 
 
 
