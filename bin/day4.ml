@@ -6,33 +6,41 @@ let make_matrix lines =
     )
     
 let dirs = [(0, 1); (0, -1); (1, 0); (1, -1); (1, 1); (-1, 0); (-1, 1); (-1, -1)] 
+let extract_idx idx matrix =
+    let m = Array.length matrix.(0) in
+    let i = idx / m in
+    let j = idx mod m in
+    (i, j)
+
 let find_removable matrix =
-    let valid (dirI, dirJ) i j =
-        (dirI + i) >= 0 && (dirI + i) < Array.length matrix &&
-            (dirJ + j) >= 0 && (dirJ + j) < (matrix.(i) |> Array.length)
+    let n = Array.length matrix in
+    let m = Array.length matrix.(0) in
+    let valid i j (dirI, dirJ) =
+        let i = dirI + i in
+        let j = dirJ + j in
+        i >= 0 &&
+        i < n &&
+        j >= 0 && 
+        j < m &&
+        matrix.(i).(j) = 1
     in
-    let (_, res) = Array.fold_left (fun (i, acc) row -> 
-        Array.fold_left (fun (j, inner_acc) elem -> 
-            if elem = 0 then (j+1, inner_acc)
-            else
-            List.fold_left (fun acc (dirI, dirJ) ->
-              if valid (dirI, dirJ) i j && matrix.(dirI + i).(dirJ + j) = 1 then acc + 1 else acc
-            ) 0 dirs
-            |> (fun num -> if num < 4 then (j+1, ((i, j) :: inner_acc)) else (j+1, inner_acc))
-        ) (0, []) row 
-        |> (fun (_, inner_acc) -> (i+1, acc @ inner_acc))
-    ) (0, []) matrix in
-    res
+    List.filter (fun idx ->
+        let (i, j) = extract_idx idx matrix in
+        matrix.(i).(j) = 1 &&
+        List.find_all (valid i j) dirs |> List.length |> (fun num -> num < 4)
+    ) (Util.range 0 ((n * m) - 1))
     
-let part1 lines =
-    make_matrix lines |> find_removable |> List.length
+let part1 lines = make_matrix lines |> find_removable |> List.length
 
 let part2 lines =
     let rec remove acc matrix =
         let removable = find_removable matrix in
         if (List.length removable = 0) then acc
         else begin
-            List.iter (fun (i, j) -> matrix.(i).(j) <- 0) removable;
+            List.iter (fun idx ->
+                let (i, j) = extract_idx idx matrix in
+                matrix.(i).(j) <- 0
+            ) removable;
             remove (acc + List.length removable) matrix
         end
     in

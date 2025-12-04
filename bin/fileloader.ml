@@ -1,8 +1,9 @@
-let rec lines ic acc: string list =
+let rec lines acc ic =
     try
      let line = input_line ic in 
-     lines ic (line :: acc)
+     lines (line :: acc) ic 
     with End_of_file ->
+        In_channel.close ic;
         List.rev acc
 
 let load_text file_path =
@@ -12,7 +13,5 @@ let load_text file_path =
     content
 
 
-let load_file file_path =
-    let ic = open_in file_path in
-    lines ic []
+let load_file file_path = open_in file_path |> lines [] 
     
