@@ -2,12 +2,6 @@ let make_matrix lines = Util.make_matrix_of lines Fun.id
     
 let dirs = [(0, 1); (0, -1); (1, 0); (1, -1); (1, 1); (-1, 0); (-1, 1); (-1, -1)] 
 
-let matrix_indices n m =
-    let ( let* ) xs f = List.concat_map f xs in
-    let* i = List.init n Fun.id in
-    let* j = List.init m Fun.id in
-    [(i, j)]
-
 let find_removable matrix =
     let n = Array.length matrix in
     let m = Array.length matrix.(0) in
@@ -18,7 +12,7 @@ let find_removable matrix =
     in
     List.filter (fun (i, j) ->
         matrix.(i).(j) = '@' && List.filter (valid i j) dirs |> List.length < 4 
-    ) (matrix_indices n m) 
+    ) (Util.matrix_indices matrix) 
     
 let part1 lines = make_matrix lines |> find_removable |> List.length
 

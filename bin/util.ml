@@ -2,6 +2,15 @@ let rec range a b =
   if a > b then []
   else a :: range (a + 1) b
 
+let matrix_indices matrix =
+    let n = Array.length matrix in
+    let m = Array.length matrix.(0) in
+    let ( let* ) xs f = List.concat_map f xs in
+    let* i = List.init n Fun.id in
+    let* j = List.init m Fun.id in
+    [(i, j)]
+
+
 let join_list_to_int l = List.to_seq l |> String.of_seq |> int_of_string 
 
 let make_matrix_of lines f =
