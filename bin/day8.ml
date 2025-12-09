@@ -9,7 +9,7 @@ type junction = {
 type connection = {
     left: junction;
     right: junction;
-    distance: float;
+    distance: int;
 }
 
 let parse_junction id s =
@@ -23,7 +23,7 @@ let parse_junction id s =
         | _ -> failwith "invalid junction"
 
 let make_connection c1 c2 =
-    let dist = Util.safe_distance (c1.x, c1.y, c1.z) (c2.x, c2.y, c2.z) in
+    let dist = Util.squared_distance (c1.x, c1.y, c1.z) (c2.x, c2.y, c2.z) in
     {
         left = c1;
         right = c2;
@@ -44,10 +44,7 @@ let make_connections junctions =
 
 let sort_connections connections = 
     List.fast_sort (fun c1 c2 ->
-        let diff =  (c1.distance -. c2.distance) in
-        if diff < 0.0 then -1
-        else if diff > 0.0 then 1
-        else 0
+        compare c1.distance c2.distance
     ) connections 
 
 let connect junctions connections iter = 

@@ -81,19 +81,11 @@ let join_sets dist v1 v2 =
     
 
 
-(* just in case the numbers are really big *)
-let safe_distance (x1, y1, z1) (x2, y2, z2) =
-    let dx = abs (x1 - x2) in
-    let dy = abs (y1 - y2) in
-    let dz = abs (z1 - z2) in
-    let max_comp = max dx dy |> max dz in
-    if max_comp = 0 then 0.0 else
-    let max_float = float_of_int max_comp in
-    let dxf = float_of_int dx /. max_float in
-    let dyf = float_of_int dy /. max_float in
-    let dzf = float_of_int dz /. max_float in
-    max_float *. sqrt (dxf *. dxf +. dyf *. dyf +. dzf *. dzf)
-    
+let squared_distance (x1, y1, z1) (x2, y2, z2) =
+    let dx = x1 - x2 in
+    let dy = y1 - y2 in
+    let dz = z1 - z2 in
+    dx * dx + dy * dy + dz * dz   
 
 let get_largest_x x dist =
     let (_, res) = Array.fold_left (fun (i, acc) e ->
