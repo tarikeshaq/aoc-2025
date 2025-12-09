@@ -69,7 +69,6 @@ let connect_spanning junctions connections =
      let right = c.right.id in
      Util.join_sets dist left right;
 
-    (* meh didn't want to keep count of the sizes properly in the disjoint set *)
      Util.get_largest_x 1 dist |> List.hd |> (fun size -> size = n) 
     ) connections in
     last_connection.left.x * last_connection.right.x

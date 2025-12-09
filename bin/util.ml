@@ -36,27 +36,32 @@ module IntMap = Map.Make (struct
 end)
 
 type distjoint = {
-    arr: int array;
+    parents: int array;
+    size: int array;
 }
 
 let mk_disjoint n =
     let arr = Array.make n 0 in
+    let size = Array.make n 1 in
     for i = 0 to (n-1) do
         arr.(i) <- i;
     done;
     {
-        arr = arr;
+        parents = arr;
+        size = size;
     }
 
 let rec find_rep dist n =
-    let arr = dist.arr in
-    if arr.(n) = n then n
-    else
-    find_rep dist arr.(n)
+    if dist.parents.(n) = n then n
+    else begin
+      let root = find_rep dist dist.parents.(n) in
+      dist.parents.(n) <- root;
+      root
+    end 
 
 let debug_dist dist =
-    for i = 0 to (Array.length dist.arr - 1) do
-        Printf.printf "Idx %d has value %d and root %d\n" i dist.arr.(i) (find_rep dist i); 
+    for i = 0 to (Array.length dist.parents - 1) do
+        Printf.printf "Idx %d has value %d and root %d\n" i dist.parents.(i) (find_rep dist i); 
     done
 
 
@@ -66,7 +71,11 @@ let is_same_set dist v1 v2 =
 let join_sets dist v1 v2 =
     let rep1 = find_rep dist v1 in
     let rep2 = find_rep dist v2 in
-    dist.arr.(rep1) <- rep2
+    if rep1 <> rep2 then begin
+     dist.parents.(rep1) <- rep2;
+     dist.size.(rep2) <- dist.size.(rep2) + dist.size.(rep1)
+    end
+    
 
 
 (* just in case the numbers are really big *)
@@ -83,13 +92,10 @@ let safe_distance (x1, y1, z1) (x2, y2, z2) =
     max_float *. sqrt (dxf *. dxf +. dyf *. dyf +. dzf *. dzf)
     
 
-(* Ideally we keep track of the num of elements in each set as we build them up, but meh *)
 let get_largest_x x dist =
-   let n = Array.length dist.arr in
-    let res = Array.make n 0 in 
-    for i = 0 to (n-1) do
-      let root = find_rep dist i in
-      res.(root) <- (res.(root) + 1)
-    done;
-    Array.to_list res |> List.fast_sort (fun a b -> b - a)
+    let (_, res) = Array.fold_left (fun (i, acc) e ->
+        let res = if i = e then dist.size.(i) :: acc else acc in
+        (i + 1, res)
+    ) (0, []) dist.parents in
+    List.fast_sort (fun a b -> b - a) res
     |> List.take x
