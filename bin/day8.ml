@@ -53,23 +53,24 @@ let sort_connections connections =
 let connect junctions connections iter = 
     let n = Array.length junctions in
     let dist = Util.mk_disjoint n in
-    let connections = List.take iter connections in
+    List.take iter connections |>
     List.iter (fun c ->
      let left = c.left.id in
      let right = c.right.id in
-     Util.join_sets dist left right;
-    ) connections;
+     let _ = Util.join_sets dist left right in
+     ()
+    );
     dist
 
 let connect_spanning junctions connections =
     let n = Array.length junctions in
     let dist = Util.mk_disjoint n in
+    let added = ref 0 in
     let last_connection = List.find (fun c ->
      let left = c.left.id in
      let right = c.right.id in
-     Util.join_sets dist left right;
-
-     Util.get_largest_x 1 dist |> List.hd |> (fun size -> size = n) 
+     if Util.join_sets dist left right then added := !added + 1;
+     !added = (n-1)
     ) connections in
     last_connection.left.x * last_connection.right.x
 
@@ -79,7 +80,6 @@ let part1 lines =
     let connections = make_connections junctions |> sort_connections in
     connect junctions connections 1000
     |> Util.get_largest_x 3
-
     |> List.fold_left (fun acc i -> if i = 0 then acc else acc * i) 1
 
 let part2 lines =

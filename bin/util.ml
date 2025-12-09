@@ -73,8 +73,11 @@ let join_sets dist v1 v2 =
     let rep2 = find_rep dist v2 in
     if rep1 <> rep2 then begin
      dist.parents.(rep1) <- rep2;
-     dist.size.(rep2) <- dist.size.(rep2) + dist.size.(rep1)
+     dist.size.(rep2) <- dist.size.(rep2) + dist.size.(rep1);
+     true
     end
+    else
+    false
     
 
 
