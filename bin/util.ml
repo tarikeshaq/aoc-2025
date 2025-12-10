@@ -80,6 +80,13 @@ let join_sets dist v1 v2 =
     false
     
 
+let all_pairs lst =
+  let rec go = function
+    | [] -> []
+    | x :: rest -> 
+        List.concat_map (fun y -> [(x, y)]) rest @ go rest
+  in
+  go lst
 
 let squared_distance (x1, y1, z1) (x2, y2, z2) =
     let dx = x1 - x2 in
