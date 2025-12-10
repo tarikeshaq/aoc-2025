@@ -88,6 +88,15 @@ let all_pairs lst =
   in
   go lst
 
+let pairs lst =
+  let rec aux hd acc = function 
+    | [] -> acc
+    | x :: y :: rest ->
+        aux hd ((x, y) :: acc) ( y :: rest)
+    | x :: [] -> (x, hd) :: acc
+  in
+  aux (List.hd lst) []  lst
+
 let squared_distance (x1, y1, z1) (x2, y2, z2) =
     let dx = x1 - x2 in
     let dy = y1 - y2 in

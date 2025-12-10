@@ -10,6 +10,11 @@ type side = {
 }
 
 let is_in_polygon (x, y) vertical_segments =
+   let on_edge = List.exists (fun side ->
+        side.anchor = x && side.s <= y && y <= side.e
+    ) vertical_segments in
+    if on_edge then true
+    else
    List.filter (
         fun side ->
             side.anchor > x  && side.s < y && y < side.e
@@ -23,10 +28,10 @@ let make_rec_sides (x1, y1) (x2, y2) =
     let min_x = min x1 x2 in
     let max_y = max y1 y2 in
     let max_x = max x1 x2 in
-[{d = V; anchor = x1; s = min_y; e = max_y};
-    {d = V; anchor = x2; s = min_y; e = max_y};
-{d = H; anchor = y1; s = min_x; e = max_x};
-        {d = H; anchor = y2; s = min_x; e = max_x}]
+[{d = V; anchor = min_x; s = min_y; e = max_y};
+    {d = V; anchor = max_x; s = min_y; e = max_y};
+{d = H; anchor = min_y; s = min_x; e = max_x};
+        {d = H; anchor = max_y; s = min_x; e = max_x}]
 
 let intersects rec_sides poly_sides =
     List.exists(fun side ->
@@ -37,13 +42,24 @@ let intersects rec_sides poly_sides =
                     && rec_side.anchor > side.s && rec_side.anchor < side.e
             ) rec_sides 
         ) poly_sides
-        
 
-let contained (x1, y1) (x2, y2) poly_sides vertical_sides =
-    let rec_sides = make_rec_sides (x1, y1) (x2, y2) in
-    let are_all_vertix_ok = (is_in_polygon (x1, y1) vertical_sides) && (is_in_polygon (x2, y2) vertical_sides) && (is_in_polygon (x1, y2) vertical_sides) && (is_in_polygon (x2, y1) vertical_sides) in
+
+let check_midpoints (x1, y1) (x2, y2) vertical_sides =
+      (is_in_polygon ((x1 + x2) / 2, y1) vertical_sides) &&
+      (is_in_polygon ((x1 + x2) / 2, y2) vertical_sides) &&
+      (is_in_polygon (x1, (y1 + y2) / 2) vertical_sides) &&
+      (is_in_polygon (x2, (y1 + y2) / 2) vertical_sides)
+
+
+let check_vertices (x1, y1) (x2, y2) vertical_sides = 
+ (is_in_polygon (x1, y1) vertical_sides) && (is_in_polygon (x2, y2) vertical_sides) && (is_in_polygon (x1, y2) vertical_sides) && (is_in_polygon (x2, y1) vertical_sides)
+
+let contained p1 p2 poly_sides vertical_sides =
+    let rec_sides = make_rec_sides p1 p2 in
+    let midpoints_ok = check_midpoints p1 p2 vertical_sides in
+    let are_all_vertix_ok = check_vertices p1 p2 vertical_sides in
     let intesect = intersects rec_sides poly_sides in
-    are_all_vertix_ok && (not intesect)
+    are_all_vertix_ok && (not intesect) && midpoints_ok
 
 let make_sides points =
     List.fold_left (fun acc ((x1, y1), (x2, y2)) ->
@@ -58,7 +74,7 @@ let make_sides points =
             else if y1 = y2 then
             { d = H; anchor = y1; s = min_x; e = max_x; }  :: acc 
             else acc 
-        ) [] (Util.all_pairs points)
+        ) [] (Util.pairs points)
 
 let make_vertical_segments sides =
     List.filter (fun side -> side.d = V) sides
