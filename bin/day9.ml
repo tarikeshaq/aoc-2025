@@ -116,4 +116,3 @@ let part2 lines =
     List.map parse_point lines
     |> max_area_2
 
-

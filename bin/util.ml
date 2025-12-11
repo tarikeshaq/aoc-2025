@@ -13,6 +13,20 @@ let matrix_indices matrix =
     let m = Array.length matrix.(0) in
     get_combination n m 
 
+let print_matrix a =
+    let num_rows = Array.length a in
+    let num_cols = Array.length a.(0) in
+    Printf.printf "[";
+    for i = 0 to num_rows - 1 do
+        Printf.printf "[";
+        for j = 0 to num_cols - 1 do
+            Printf.printf "%f, " a.(i).(j);
+        done;
+        Printf.printf "],\n";
+    done;
+    Printf.printf "]"
+
+ 
 
 let join_list_to_int l = List.to_seq l |> String.of_seq |> int_of_string 
 
@@ -87,6 +101,17 @@ let all_pairs lst =
         List.concat_map (fun y -> [(x, y)]) rest @ go rest
   in
   go lst
+
+
+(* Convert int to binary string *)
+let binary_of_int n =
+  if n = 0 then "0b0"
+  else
+    let rec aux acc n =
+      if n = 0 then acc
+      else aux (string_of_int (n land 1) ^ acc) (n lsr 1)
+    in
+    "0b" ^ aux "" n
 
 let pairs lst =
   let rec aux hd acc = function 
